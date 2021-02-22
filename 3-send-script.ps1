@@ -1,35 +1,67 @@
-1.)
+Set-ExecutionPolicy RemoteSigned -Force
 
-Send-MailMessage -SmtpServer 'smtp.office365.com' -From ‘sender@domain.com' -To 'someemail@domain.com' -Subject 'this is a subject' -Body 'this is the body' -UseSsl -Port 587 -Credential $credential -Verbose
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
+Install-Module-ExchangeonlineManagement
+
+Connect-Exchangeonline -userprincipalname "admin@domain.com"
+
+1.a) # Standard Version
 -------------------------------------------------------------------------------------
 
-2.)	test 2
+$TO = "Recipient@domain.com"
 
-$Cred = Get-Credential
-$sendMailParams = @{
-    From = ‘sender@domain.com' ## Must be own tenant
-    To = 'someemail@domain.com'
-    Subject = 'some subject'
-    Body = 'some body'
-    SMTPServer = ‘smtp.office365.com’
-    SMTPPort = 587
-    UseSsl = $true
-    Credential = $Cred
-}
+$FROM = "Sender@domain.com"
 
-Send-MailMessage @sendMailParams
+$Cred = get-credential $From         # <-- Provide sender's credentials when prompt 
 
+$Body = "This is the body of test message. The message was sent on: $(get-date)"
+
+<# alternative
+$Body = @'
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+This is a test message to trigger an ETR.
+
+The message was sent on: $(get-date)
+</body>
+</html>
+'@
+alternative #>
+
+$Param = @{  to = $TO
+           from = $FROM
+     smtpserver = "smtp.office365.com"
+           port = "587"
+        subject = "SMTP - Client submission - 587"
+           body = "This is the body of test message. The message was sent on: $(get-date)"
+     Credential = $Cred
+         UseSsl = $true
+     BodyAsHtml = $true }
+
+Send-mailmessage $Param
+
+write-host "Sending Message..."
+
+# Collect output in a TXT file if it fails)
 -------------------------------------------------------------------------------------
+2) # extended Version 
+-------------------------------------------------------------------------------------
+$Credential = (Get-Credential)
+$PARAM = @{ From = "SENDER@YourDomain.Com"
+              To = "First@Recipient.com", "Second@Recipient.com"
+              Cc = "Other@Recipient.com"
+     Attachments = "C:\Temp\Attachment.jpg"
+         Subject = "Photos attached"
+      SmtpServer = "smtp.office365.com"
+            Port = "587"
+          UseSsl = $true
+      BodyAsHtml = $true
+         Verbose = $true }
 
-3.) test 3
-# Source https://blog.mailtrap.io/powershell-send-email/
-
-$From = "mother-of-dragons@houseoftargaryen.net"
-$To = "jon-snow@winterfell.com", "jorah-mormont@night.watch”
-$Cc = "tyrion-lannister@westerlands.com"
-$Attachment = "C:\Temp\Drogon.jpg"
-$Subject = "Photos of Drogon"
 $Body = @'
 <!DOCTYPE html>
 <html>
@@ -40,16 +72,12 @@ This is a test message to trigger an ETR.
 </body>
 </html>
 '@
-$SMTPServer = "smtp.office365.com"
-$SMTPPort = "587"
-Send-MailMessage -From $From -to $To -Cc $Cc -Subject $Subject -Body $Body -BodyAsHtml -SmtpServer $SMTPServer -Port $SMTPPort -UseSsl -Credential (Get-Credential) -Attachments $Attachment
+
+Send-MailMessage @Param -Body $Body -Credential $Credential
 
 -------------------------------------------------------------------------------------
-
-4) test 4
-
-# Source https://www.undocumented-features.com/2018/05/22/send-authenticated-smtp-with-powershell/
-
+3) .NET Send Method #1         # Source https://www.undocumented-features.com/2018/05/22/send-authenticated-smtp-with-powershell/
+-------------------------------------------------------------------------------------
 # Sender and Recipient Info
 $MailFrom = "sender@senderdomain.com"
 $MailTo = "recipient@recipientdomain.com"
@@ -85,9 +113,8 @@ $Smtp.Credentials = New-Object System.Net.NetworkCredential($Username,$Password)
 $Smtp.Send($Message)
 
 -------------------------------------------------------------------------------------
-
-5) test 5
-
+4) .NET Send Method #Alternative
+-------------------------------------------------------------------------------------
 #Ask for credentials and store them
 $credential = Get-Credential
 $credential.Password | ConvertFrom-SecureString | Set-Content C:\Passwords\scriptsencrypted_password1.txt
@@ -120,3 +147,15 @@ $SMTPClient.EnableSsl = $true
 $SMTPClient.Credentials = $credential;
 # Send email
 $SMTPClient.Send($EmailFrom, $EmailTo, $Subject, $Body)
+
+-------------------------------------------------------------------------------------
+# Example to store credentials
+-------------------------------------------------------------------------------------
+
+# ADMINCredential
+Get-Credential $ADMIN | Export-Clixml $ENV:UserProfile\Documents\ADMINCredential.xml
+$ADMINcred = Import-Clixml $ENV:UserProfile\Documents\ADMINCredential.xml
+
+# FROM Credential
+Get-Credential $FROM | Export-Clixml $ENV:UserProfile\Documents\FROMCredential.xml
+$FROMcred = Import-Clixml $ENV:UserProfile\Documents\FROMCredential.xml
