@@ -20,18 +20,21 @@ $Subject = "Test message Powershell"
 ############ choose short vs long ########################
 $body = "Please find attached - test"
 
-$Body = @'
+$Body = @"
 <!DOCTYPE html>
 <html>
 <head>
 </head>
 <body>
 This is a test message to trigger an ETR.
-
 The message was sent on: $(get-date)
 </body>
 </html>
-'@
+"@
+
+$web = wget "https://raw.githubusercontent.com/jahube/SMTP/main/misc/template.html"
+$Body = [System.Web.HttpUtility]::HtmlDecode($web.content)
+
 ##########################################################
 $message = new-object System.Net.Mail.MailMessage
 $message.From = $FROM
@@ -41,8 +44,9 @@ $message.Subject = $Subject
 $attach = new-object Net.Mail.Attachment($attachment)
 $message.Attachments.Add($attach)
 $message.body = $body
-$smtp = new-object Net.Mail.SmtpClient($SmtpServer, $Port)
+
+$smtp = new-object Net.Mail.SmtpClient($SmtpServer, 587)
 $smtp.EnableSsl = $true
 $smtp.Credentials = $credential;
 $smtp.Send($message)
-##########################################################
+########################################################## 
