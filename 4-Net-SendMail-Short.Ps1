@@ -20,7 +20,7 @@ $Subject = "Test message Powershell"
 ############ choose short vs long ########################
 $body = "Please find attached - test"
 
-$Body = @"
+$Body = @'
 <!DOCTYPE html>
 <html>
 <head>
@@ -30,7 +30,7 @@ This is a test message to trigger an ETR.
 The message was sent on: $(get-date)
 </body>
 </html>
-"@
+'@
 
 $web = wget "https://raw.githubusercontent.com/jahube/SMTP/main/misc/template.html"
 $Body = [System.Web.HttpUtility]::HtmlDecode($web.content)
