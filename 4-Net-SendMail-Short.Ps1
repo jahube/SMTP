@@ -17,9 +17,12 @@ $Port = "587"
 ##########################################################
 $Subject = "Test message Powershell"
 
-############ choose short vs long ########################
+####################  choose 1/2/3  ######################
+
+# (1) minimalist <<
 $body = "Please find attached - test"
 
+# (2) HTML Block <<
 $Body = @'
 <!DOCTYPE html>
 <html>
@@ -32,6 +35,7 @@ The message was sent on: $(get-date)
 </html>
 '@
 
+# (3) Hmtl Template
 $web = wget "https://raw.githubusercontent.com/jahube/SMTP/main/misc/template.html"
 $Body = [System.Web.HttpUtility]::HtmlDecode($web.content)
 
