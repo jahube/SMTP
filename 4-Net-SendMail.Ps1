@@ -1,4 +1,3 @@
-it worked 
 ######## PLAINTEXT ########
 # Sender Credentials
 $Username = "sender@domain.com"
@@ -16,23 +15,46 @@ $encrypted = Get-Content C:\scriptsencrypted_password1.txt | ConvertTo-SecureStr
 
 # Set variables
 $emailusername = "sender@domain.com"
-$credential = New-Object System.Management.Automation.PsCredential($emailusername, $encrypted)
 
-########################################
-$fromaddress = "sender@domain.com"
+$credential = New-Object System.Management.Automation.PsCredential($emailusername, $encrypted)
+########################################################
+
+$fromaddress = "FROM@domain.com"
+
 $toaddress = "first@recipient.com", "second@recipient.com", "third@recipient.com"
-$Subject = "Test message Powershell" 
+
+$Subject = "Test message Powershell"
+
+############## choose short / long $body ###############
+
 $body = "Please find attached - test"
-$attachment = "c:\send-emails-with-office365-smtp.png" 
+
+$Body = @'
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+This is a test message to trigger an ETR.
+
+The message was sent on: $(get-date)
+</body>
+</html>
+'@
+
+#########################################################
+
+$attachment = "c:\send-emails-with-office365-smtp.png"
+
 $smtpserver = "smtp.office365.com"
 
 #Use the variables in the script:
-$message = new-object System.Net.Mail.MailMessage 
-$message.From = $fromaddress 
+$message = new-object System.Net.Mail.MailMessage
+$message.From = $fromaddress
 $message.To.Add($toaddress)
-$message.IsBodyHtml = $True 
-$message.Subject = $Subject 
-$attach = new-object Net.Mail.Attachment($attachment) 
+$message.IsBodyHtml = $True
+$message.Subject = $Subject
+$attach = new-object Net.Mail.Attachment($attachment)
 $message.Attachments.Add($attach)
 $message.body = $body
-$smtp = new-object Net.Mail.SmtpClient($SmtpServer, 587) 
+$smtp = new-object Net.Mail.SmtpClient($SmtpServer, 587)
