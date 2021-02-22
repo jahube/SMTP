@@ -42,4 +42,7 @@ $attach = new-object Net.Mail.Attachment($attachment)
 $message.Attachments.Add($attach)
 $message.body = $body
 $smtp = new-object Net.Mail.SmtpClient($SmtpServer, $Port)
+$smtp.EnableSsl = $true
+$smtp.Credentials = $credential;
+$smtp.Send($message)
 ##########################################################
