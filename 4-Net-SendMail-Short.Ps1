@@ -2,14 +2,14 @@ Set-ExecutionPolicy RemoteSigned -Force
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-Install-Module-ExchangeonlineManagement
+######### Fill Out Variables #############################
 
-Connect-Exchangeonline -userprincipalname "admin@domain.com"
-
-##########################################################
 $FROM = "sender@domain.com"
+
 $TO = "first@recipient.com", "second@recipient.com", "third@recipient.com"
+
 $attachment = "c:\send-emails-with-office365-smtp.png"
+
 ##########################################################
 $credential = get-credential $FROM
 $smtpserver = "smtp.office365.com"
